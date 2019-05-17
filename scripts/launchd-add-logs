@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+{ set +x; } 2>/dev/null
+
+usage() {
+    cat <<EOF 1>&2
+usage: $(basename $0) path ...
+EOF
+    [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; exit
+}
+
+[[ $1 == "-h" ]] || [[ $1 == "--help" ]] && usage "$@"
+
+[[ $# == 0 ]] && usage
+
+while (($#)); do
+    ! [ -e "$1" ] && echo "ERROR ($1): NOT EXISTS" 1>&2 && exit 1
+    ! [ -f "$1" ] && echo "ERROR ($1): NOT A FILE" 1>&2 && exit 1
+    [[ $1 != *.plist ]] && echo "ERROR ($1): NOT .plist" 1>&2 && exit 1
+    grep -q "<key>Label</key>" "$1" || { echo "ERROR ($1): Label required" && exit 1; }
+    Label="$(/usr/libexec/PlistBuddy -c "Print Label" "$1")" || exit
+
+    for key in StandardOutPath StandardErrorPath; do
+        [[ $key == "StandardOutPath" ]] && filename="out.log" || filename="err.log"
+        grep -q "<key>$key</key>" "$1" || {
+            path=~/"Library/Logs/LaunchAgents/$Label/$filename"
+            /usr/libexec/PlistBuddy -c "Add $key string '$path'" "$1" || exit
+        }
+    done
+    shift
+done;:
+
