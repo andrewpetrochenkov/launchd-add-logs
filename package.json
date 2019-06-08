@@ -1,0 +1,14 @@
+{
+  "name": "launchd-add-logs",
+  "version": "2019.4.13",
+  "description": "add launchd.plist logs",
+  "keywords": [
+    "launchd",
+    "logs"
+  ],
+  "homepage": "https://github.com/looking-for-a-job/launchd-add-logs",
+  "license": "Unlicense",
+  "bin": {
+    "launchd-add-logs": "./scripts/launchd-add-logs"
+  }
+}
